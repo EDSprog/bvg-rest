@@ -1,0 +1,4 @@
+api.gptransport.app {
+	reverse_proxy bvg-rest:3000
+	encode gzip zstd
+}

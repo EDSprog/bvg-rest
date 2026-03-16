@@ -1,0 +1,45 @@
+services:
+  bvg-rest:
+    build: .
+    environment:
+      - HOSTNAME=api.gptransport.app
+      - PORT=3000
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - bvg-rest
+    restart: unless-stopped
+    networks:
+      - internal
+
+volumes:
+  redis-data:
+  caddy-data:
+  caddy-config:
+
+networks:
+  internal:
